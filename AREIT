@@ -1,0 +1,50 @@
+install.packages('tidyverse')
+library(ggplot2)
+library(lubridate)
+library(dplyr)
+
+areit = read.csv('areit_data_dates.csv')
+areit_ordered = areit[rev(order(as.Date(areit$Date, format="%Y/%M/%D"))),]
+
+#Weekly Closing Price
+ggplot(data = areit_ordered, aes(x = Date, y = Close, group = 1)) + 
+  geom_line() + geom_point() + theme(axis.text.x = element_text(angle = 90, 
+  size = 8)) + ylab("Closing Price (PHP)") +
+  ggtitle("AREIT Stock Price Over Time")
+
+
+#Return Rate
+pct_change = diff(areit_ordered$Close)/areit_ordered$Close[-1] * 100
+pct_change = c(0,pct_change)
+
+areit_return = areit_ordered %>%
+  dplyr::mutate(pct_change)
+
+hist(pct_change, prob = TRUE, breaks = 20, 
+     xlab = "Percent Change", main = "Histogram of Returns",
+     xlim = c(-10,10), ylim = c(0,0.2))
+curve(dnorm(x, mean(pct_change), sd(pct_change)), add = TRUE)
+
+boxplot(pct_change, ylab = "Percent Change",
+        main = "Boxplot of Returns")
+
+mean(pct_change)
+sd(pct_change)
+median(pct_change)
+
+install.packages("moments")
+library(moments)
+skewness(pct_change)
+
+ggplot(data = areit_ordered, aes(x = Date, y = pct_change, group = 1)) + 
+  geom_point() + geom_line() + theme(axis.text.x = element_text(angle = 90, 
+  size = 8)) + ylab("Closing Price (PHP)") + 
+  ggtitle("AREIT Weekly Percent Change")
+
+#Volume
+ggplot(data = areit_ordered, aes(x = Date, y = Volume, group = 1)) +
+  geom_line() + geom_point() + theme(axis.text.x = element_text(angle = 90,
+  size = 8)) + ylab("Closing Price (PHP)") + 
+  ggtitle("AREIT Stock Price Over Time")
+
+  
